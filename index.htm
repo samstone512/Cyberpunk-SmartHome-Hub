@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>osi's home</title>
+  <style>
+    body {
+      margin: 0; padding: 0; height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: url('cd.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    /* نوار سنسورها در بالا */
+    .sensor-bar {
+      background: rgba(10, 15, 30, 0.4);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 30px;
+      padding: 10px 25px;
+      color: #0ff;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+      display: flex; gap: 20px;
+    }
+    .sensor-value { color: #fff; text-shadow: 0 0 5px #fff; }
+    
+    /* پنل کنترل مینیمال */
+    .glass-panel {
+      background: rgba(10, 15, 30, 0.5);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      width: 90%; max-width: 380px;
+    }
+    h2 {
+      color: #0ff; margin: 0 0 20px 0;
+      letter-spacing: 2px; text-shadow: 0 0 8px #0ff;
+      text-transform: lowercase;
+    }
+    
+    /* چینش دکمه‌ها در کنار هم برای اشغال فضای کمتر */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    /* دکمه کولر در یک ردیف کامل */
+    .btn-full { grid-column: span 2; }
+    
+    .btn {
+      padding: 12px;
+      background: transparent;
+      color: #fff;
+      border: 1px solid;
+      border-radius: 8px;
+      font-size: 15px; font-weight: bold;
+      cursor: pointer; transition: 0.3s;
+    }
+    .btn-cyan { border-color: #0ff; }
+    .btn-cyan:active { background: rgba(0,255,255,0.3); box-shadow: 0 0 15px #0ff; }
+    .btn-magenta { border-color: #f0f; }
+    .btn-magenta:active { background: rgba(255,0,255,0.3); box-shadow: 0 0 15px #f0f; }
+    .btn-yellow { border-color: #ff0; }
+    .btn-yellow:active { background: rgba(255,255,0,0.3); box-shadow: 0 0 15px #ff0; }
+  </style>
+</head>
+<body>
+
+  <div class="sensor-bar">
+    <div>TEMP: <span class="sensor-value" id="temp">--</span>°C</div>
+    <div>HUM: <span class="sensor-value" id="hum">--</span>%</div>
+  </div>
+
+  <div class="glass-panel">
+    <h2>osi's home</h2>
+    
+    <div class="btn-grid">
+      <button class="btn btn-magenta btn-full" onclick="sendCommand('ac_on')">⚡ AC POWER</button>
+      
+      <button class="btn btn-cyan" onclick="sendCommand('r1_on')">RELAY 1 ON</button>
+      <button class="btn btn-cyan" onclick="sendCommand('r1_off')">RELAY 1 OFF</button>
+      
+      <button class="btn btn-yellow" onclick="sendCommand('r2_on')">RELAY 2 ON</button>
+      <button class="btn btn-yellow" onclick="sendCommand('r2_off')">RELAY 2 OFF</button>
+    </div>
+  </div>
+
+  <script>
+    // تابع ارسال دستورات دکمه‌ها
+    function sendCommand(cmd) {
+      fetch('/' + cmd).catch(e => console.log(e));
+    }
+
+    // تابع دریافت اتوماتیک دما و رطوبت هر 5 ثانیه
+    function fetchSensors() {
+      fetch('/api_sensors')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('temp').innerText = data.t;
+          document.getElementById('hum').innerText = data.h;
+        })
+        .catch(e => console.log("Sensor fetch error"));
+    }
+    
+    // اجرای اولیه و تنظیم تایمر برای آپدیت اطلاعات
+    fetchSensors();
+    setInterval(fetchSensors, 5000);
+  </script>
+</body>
+</html>
